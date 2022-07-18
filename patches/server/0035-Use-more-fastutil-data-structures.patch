@@ -6,10 +6,10 @@ Subject: [PATCH] Use more fastutil data structures
 Use them in more places.
 
 diff --git a/pom.xml b/pom.xml
-index 933764e10273e796ec7aa2e2657f268378d43657..f86a4cf893bfdb1a12c156361ca166a9abd7e8db 100644
+index e30d9e85340ca47f2021c8e0681d8fbc17de509e..b2bb7740ca2bae52a22cd3a188ba854fe751fafb 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -67,12 +67,6 @@
+@@ -68,12 +68,6 @@
              <version>5.1.49</version>
              <scope>runtime</scope>
          </dependency>

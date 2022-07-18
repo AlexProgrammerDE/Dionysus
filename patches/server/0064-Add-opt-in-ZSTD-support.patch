@@ -5,10 +5,10 @@ Subject: [PATCH] Add opt-in ZSTD support
 
 
 diff --git a/pom.xml b/pom.xml
-index 2e11fae06a234b930f4cdf2bbf4c2550ccb26218..a98ba97a7d6dad1164abe3c0cb8379cd7e96d250 100644
+index 3c9b30006f8ef1c1b1ea85465fab0e17e8c614af..0fcf6f357bf3f1e1f787ab63a54ef09315c79d5e 100644
 --- a/pom.xml
 +++ b/pom.xml
-@@ -167,6 +167,11 @@
+@@ -179,6 +179,11 @@
                  </exclusion>
              </exclusions>
          </dependency>
