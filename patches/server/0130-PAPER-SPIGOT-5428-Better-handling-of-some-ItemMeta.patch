@@ -1,0 +1,102 @@
+From 0000000000000000000000000000000000000000 Mon Sep 17 00:00:00 2001
+From: Softik Lord <dimap9986@gmail.com>
+Date: Mon, 18 Jul 2022 16:28:03 +0500
+Subject: [PATCH] PAPER-SPIGOT-5428-Better-handling-of-some-ItemMeta
+
+
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java
+index 7b3567894468d7c38c364c6f2be7d8d7c78e860a..386b1dfee1644ec5c238fc7a69a965fc7d80d7a0 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaBanner.java
+@@ -53,7 +53,14 @@ public class CraftMetaBanner extends CraftMetaItem implements BannerMeta {
+             NBTTagList patterns = entityTag.getList(PATTERNS.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND);
+             for (int i = 0; i < Math.min(patterns.size(), 20); i++) {
+                 NBTTagCompound p = patterns.get(i);
+-                this.patterns.add(new Pattern(DyeColor.getByDyeData((byte) p.getInt(COLOR.NBT)), PatternType.getByIdentifier(p.getString(PATTERN.NBT))));
++                // Paper start - Backport SPIGOT-5428
++                DyeColor color = DyeColor.getByWoolData((byte) p.getInt(COLOR.NBT));
++                PatternType pattern = PatternType.getByIdentifier(p.getString(PATTERN.NBT));
++
++                if (color != null && pattern != null) {
++                    this.patterns.add(new Pattern(color, pattern));
++                }
++               // Paper end
+             }
+         }
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaCharge.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaCharge.java
+index 6c6fde739d9d96117a33adb266c5ed14bcdd91d1..922f11bc5fdf6c56659fa97843d3a17cfd7ea01a 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaCharge.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaCharge.java
+@@ -36,7 +36,13 @@ class CraftMetaCharge extends CraftMetaItem implements FireworkEffectMeta {
+         super(tag);
+ 
+         if (tag.hasKey(EXPLOSION.NBT)) {
+-            effect = CraftMetaFirework.getEffect(tag.getCompound(EXPLOSION.NBT));
++            // Paper start - Backport SPIGOT-5428
++            try {
++                effect = CraftMetaFirework.getEffect(tag.getCompound(EXPLOSION.NBT));
++            } catch (IllegalArgumentException ex) {
++                // Ignore invalid effects
++            }
++            // Paper end
+         }
+     }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaFirework.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaFirework.java
+index 682c2287de51a1d4d2dabc80053a001675a0701f..c7914f3a5c3c8ef124a09701d3ffdc168de23288 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaFirework.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaFirework.java
+@@ -93,7 +93,13 @@ class CraftMetaFirework extends CraftMetaItem implements FireworkMeta {
+         List<FireworkEffect> effects = this.effects = new ArrayList<FireworkEffect>(fireworkEffects.size());
+ 
+         for (int i = 0; i < fireworkEffects.size(); i++) {
+-            effects.add(getEffect((NBTTagCompound) fireworkEffects.get(i)));
++            // Paper start - Backport SPIGOT-5428
++            try {
++                effects.add(getEffect((NBTTagCompound) fireworkEffects.get(i)));
++            } catch (IllegalArgumentException ex) {
++                // Ignore invalid effects
++            }
++            // Paper end - Backport SPIGOT-5428
+         }
+     }
+ 
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaMap.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaMap.java
+index de695e4e7bef8167037572fc971476adeade33cc..700ce78c96bd5d70051e13fcc7ffd7fc0b511fdc 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaMap.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaMap.java
+@@ -55,7 +55,13 @@ class CraftMetaMap extends CraftMetaItem implements MapMeta {
+             }
+ 
+             if (display.hasKey(MAP_COLOR.NBT)) {
+-                color = Color.fromRGB(display.getInt(MAP_COLOR.NBT));
++                // Paper start - Backport SPIGOT-5428
++                try {
++                    color = Color.fromRGB(display.getInt(MAP_COLOR.NBT));
++                } catch (IllegalArgumentException ex) {
++                    // Invalid colour
++                }
++                // Paper end
+             }
+         }
+     }
+diff --git a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaPotion.java b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaPotion.java
+index 1080e52ccaf4e6dd50e5bf0034f24f879e119673..b17e9ecfe0ec29a891e71d4c66b92965d4e5de8f 100644
+--- a/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaPotion.java
++++ b/src/main/java/org/bukkit/craftbukkit/inventory/CraftMetaPotion.java
+@@ -61,7 +61,13 @@ class CraftMetaPotion extends CraftMetaItem implements PotionMeta {
+             type = CraftPotionUtil.toBukkit(tag.getString(DEFAULT_POTION.NBT));
+         }
+         if (tag.hasKey(POTION_COLOR.NBT)) {
+-            color = Color.fromRGB(tag.getInt(POTION_COLOR.NBT));
++            // Paper start - Backport SPIGOT-5428
++            try {
++                color = Color.fromRGB(tag.getInt(POTION_COLOR.NBT));
++            } catch (IllegalArgumentException ex) {
++                // Invalid colour
++            }
++            // Paper end
+         }
+         if (tag.hasKey(POTION_EFFECTS.NBT)) {
+             NBTTagList list = tag.getList(POTION_EFFECTS.NBT, CraftMagicNumbers.NBT.TAG_COMPOUND);
