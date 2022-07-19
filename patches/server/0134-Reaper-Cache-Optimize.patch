@@ -3,10 +3,6 @@ From: Softik Lord <dimap9986@gmail.com>
 Date: Wed, 20 Jul 2022 04:16:07 +0500
 Subject: [PATCH] Reaper-Cache-Optimize
 
-The hottest part of path-finding is reading blocks out from the world. This patch makes a number of changes to avoid slow paths in the game and to better inline code. In testing, it shows a small improvement in path-finding code.
-
-Credits to Lithium: https://github.com/CaffeineMC/lithium-fabric/blob/546b7e72dd64fbf7dd8cb0676ad711dcffc62d07/src/main/java/me/jellysquid/mods/lithium/mixin/ai/pathing/ChunkCacheMixin.java
-
 diff --git a/src/main/java/net/minecraft/server/BaseBlockPosition.java b/src/main/java/net/minecraft/server/BaseBlockPosition.java
 index 8e737718ee517d60b36ff0489d074c26c4ee67c4..131589cc22ab8e34a2da9d572acaed1a8acdaad4 100644
 --- a/src/main/java/net/minecraft/server/BaseBlockPosition.java
